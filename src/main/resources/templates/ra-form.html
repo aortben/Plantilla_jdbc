@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<th:block th:replace="fragments/head :: head('Formulario RA')"></th:block>
+<body>
+<th:block th:replace="fragments/header :: header"></th:block>
+
+<div class="container mt-5 pt-5">
+    <h2 th:text="${ra.id == null} ? 'Nuevo RA' : 'Editar RA'"></h2>
+
+    <form th:action="@{/ra}" th:object="${ra}" method="post">
+        <input type="hidden" th:field="*{id}"/>
+
+        <div class="mb-3">
+            <label class="form-label">Nombre:</label>
+            <input type="text" th:field="*{nombre}" class="form-control" required/>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Descripción:</label>
+            <textarea th:field="*{descripcion}" class="form-control" rows="3"></textarea>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Curso:</label>
+            <select th:field="*{cursoId}" class="form-select" required>
+                <option value="">Selecciona un curso</option>
+                <option th:each="curso : ${todosCursos}"
+                        th:value="${curso.id}"
+                        th:text="${curso.nombre}">
+                </option>
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-success">Guardar</button>
+        <a th:href="@{/ra}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+
+<th:block th:replace="fragments/footer :: footer"></th:block>
+</body>
+</html>

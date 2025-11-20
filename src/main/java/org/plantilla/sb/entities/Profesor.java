@@ -14,5 +14,8 @@ public class Profesor {
 
     // Relación inversa N:M
     private Set<Curso> cursos = new HashSet<>();
+
+    // Campo temporal para Thymeleaf (solo almacena IDs)
+    private Set<Long> cursoIds = new HashSet<>();
 }
 

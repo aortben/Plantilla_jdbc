@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<th:block th:replace="fragments/head :: head('Resultados de Aprendizaje')"></th:block>
+<body>
+<th:block th:replace="fragments/header :: header"></th:block>
+
+<div class="container mt-5 pt-5">
+    <h2>Lista de Resultados de Aprendizaje</h2>
+    <a th:href="@{/ra/new}" class="btn btn-primary mb-3">Nuevo RA</a>
+
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>ID</th><th>Nombre</th><th>Descripción</th><th>Curso</th><th>Acciones</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="ra : ${resultados}">
+            <td th:text="${ra.id}"></td>
+            <td th:text="${ra.nombre}"></td>
+            <td th:text="${ra.descripcion}"></td>
+            <td th:text="${ra.cursoId}"></td>
+            <td>
+                <a th:href="@{'/ra/edit/' + ${ra.id}}" class="btn btn-sm btn-warning">Editar</a>
+                <a th:href="@{'/ra/delete/' + ${ra.id}}" class="btn btn-sm btn-danger">Borrar</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<th:block th:replace="fragments/footer :: footer"></th:block>
+</body>
+</html>

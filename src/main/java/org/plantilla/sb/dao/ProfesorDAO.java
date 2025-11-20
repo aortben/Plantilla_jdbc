@@ -25,4 +25,6 @@ public interface ProfesorDAO {
     void addCursoToProfesor(Long profesorId, Long cursoId) throws SQLException;
 
     void removeCursoFromProfesor(Long profesorId, Long cursoId) throws SQLException;
+
+    List<Curso> listAllCursos() throws SQLException;
 }

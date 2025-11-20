@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 import javax.sql.DataSource;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 @Repository
@@ -33,6 +34,8 @@ public class ProfesorDAOImpl implements ProfesorDAO {
                 profesor.setId(rs.getLong("id"));
                 profesor.setNombre(rs.getString("nombre"));
                 profesor.setApellido(rs.getString("apellido"));
+                List<Curso> cursos = getCursosByProfesorId(profesor.getId());
+                profesor.setCursos(new HashSet<>(cursos));
                 profesores.add(profesor);
             }
         }
@@ -179,5 +182,28 @@ public class ProfesorDAOImpl implements ProfesorDAO {
 
             stmt.executeUpdate();
         }
+    }
+
+    // -------------------------------------------------------
+    // LIST ALL CURSOS
+    // -------------------------------------------------------
+    @Override
+    public List<Curso> listAllCursos() throws SQLException {
+        List<Curso> cursos = new ArrayList<>();
+        String sql = "SELECT id, nombre FROM curso";
+
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                Curso curso = new Curso();
+                curso.setId(rs.getLong("id"));
+                curso.setNombre(rs.getString("nombre"));
+                cursos.add(curso);
+            }
+        }
+
+        return cursos;
     }
 }

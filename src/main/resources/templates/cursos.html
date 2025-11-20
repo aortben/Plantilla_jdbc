@@ -1,8 +1,11 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<th:block th:replace="fragments/head :: head('Cursos')"></th:block>
+<!-- Head con título -->
+<th:block th:replace="~{fragments/head :: head('Cursos')}"></th:block>
+
 <body>
-<th:block th:replace="fragments/header :: header"></th:block>
+<!-- Header -->
+<th:block th:replace="~{fragments/header :: header}"></th:block>
 
 <div class="container mt-5 pt-5">
     <h2>Lista de Cursos</h2>
@@ -11,7 +14,10 @@
     <table class="table table-striped">
         <thead>
         <tr>
-            <th>ID</th><th>Nombre</th><th>Profesores</th><th>Acciones</th>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Profesores</th>
+            <th>Acciones</th>
         </tr>
         </thead>
         <tbody>
@@ -19,7 +25,11 @@
             <td th:text="${curso.id}"></td>
             <td th:text="${curso.nombre}"></td>
             <td>
-                <span th:each="profesor : ${curso.profesores}" th:text="${profesor.nombre + ' ' + profesor.apellido} + ', '"></span>
+                <!-- Mostrar profesores separados por coma sin dejar la última coma -->
+                <span th:each="profesor, iterStat : ${curso.profesores}">
+                    <span th:text="${profesor.nombre + ' ' + profesor.apellido}"></span>
+                    <span th:if="${!iterStat.last}">, </span>
+                </span>
             </td>
             <td>
                 <a th:href="@{'/cursos/edit/' + ${curso.id}}" class="btn btn-sm btn-warning">Editar</a>
@@ -30,6 +40,8 @@
     </table>
 </div>
 
-<th:block th:replace="fragments/footer :: footer"></th:block>
+<!-- Footer -->
+<th:block th:replace="~{fragments/footer :: footer}"></th:block>
 </body>
 </html>
+

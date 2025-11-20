@@ -7,31 +7,54 @@
 <div class="container mt-5 pt-5">
     <h2 th:text="${alumno.id == null} ? 'Nuevo Alumno' : 'Editar Alumno'"></h2>
 
-    <form th:action="@{${alumno.id == null} ? '/alumnos' : '/alumnos/' + ${alumno.id}}" th:object="${alumno}" method="post">
+    <form th:action="@{/alumnos}" th:object="${alumno}" method="post">
+        <!-- ID oculto -->
+        <input type="hidden" th:field="*{id}" />
+        <!-- Nombre -->
         <div class="mb-3">
             <label class="form-label">Nombre:</label>
             <input type="text" th:field="*{nombre}" class="form-control" required/>
         </div>
+
+        <!-- Apellido -->
         <div class="mb-3">
             <label class="form-label">Apellido:</label>
             <input type="text" th:field="*{apellido}" class="form-control" required/>
         </div>
+
+        <!-- Edad -->
         <div class="mb-3">
             <label class="form-label">Edad:</label>
-            <input type="number" th:field="*{edad}" class="form-control" required/>
+            <input type="number" th:field="*{edad}" class="form-control" min="1" required/>
         </div>
+
+        <!-- Email -->
         <div class="mb-3">
             <label class="form-label">Email:</label>
             <input type="email" th:field="*{email}" class="form-control" required/>
         </div>
+
+        <!-- Cursos N:M -->
         <div class="mb-3">
-            <label class="form-label">Curso ID:</label>
-            <input type="number" th:field="*{cursoId}" class="form-control"/>
+            <label class="form-label">Cursos:</label>
+            <select th:field="*{cursoIds}" multiple class="form-select">
+                <option th:each="curso : ${todosCursos}"
+                        th:value="${curso.id}"
+                        th:text="${curso.nombre}"
+                        th:selected="${alumno.cursoIds.contains(curso.id)}">
+                </option>
+            </select>
+            <small class="form-text text-muted">
+                Mantén presionada Ctrl (Windows) o Cmd (Mac) para seleccionar varios cursos.
+            </small>
         </div>
+
         <button type="submit" class="btn btn-success">Guardar</button>
         <a th:href="@{/alumnos}" class="btn btn-secondary">Cancelar</a>
     </form>
 </div>
+
+
 
 <th:block th:replace="fragments/footer :: footer"></th:block>
 </body>

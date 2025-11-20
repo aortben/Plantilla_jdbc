@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <th:block th:replace="fragments/head :: head('Alumnos')"></th:block>
 <body>
-<th:block th:replace="fragments/header :: header"></th:block>
+<th:block th:replace="~{fragments/header :: header}"></th:block>
 
 <div class="container mt-5 pt-5">
     <h2>Lista de Alumnos</h2>
@@ -23,7 +23,7 @@
             <td th:text="${alumno.email}"></td>
             <td th:text="${alumno.cursoId}"></td>
             <td>
-                <a th:href="@{'/alumnos/edit/' + ${alumno.id}}" class="btn btn-sm btn-warning">Editar</a>
+                <a th:href="@{'/alumnos/' + ${alumno.id} + '/edit'}" class="btn btn-sm btn-warning">Editar</a>
                 <a th:href="@{'/alumnos/delete/' + ${alumno.id}}" class="btn btn-sm btn-danger">Borrar</a>
             </td>
         </tr>
@@ -31,6 +31,6 @@
     </table>
 </div>
 
-<th:block th:replace="fragments/footer :: footer"></th:block>
+<th:block th:replace="~{fragments/footer :: footer}"></th:block>
 </body>
 </html>

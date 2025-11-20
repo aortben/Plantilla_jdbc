@@ -27,6 +27,8 @@ public interface AlumnoDAO {
 
     void removeCursoFromAlumno(Long alumnoId, Long cursoId) throws SQLException;
 
+    List<Curso> listAllCursos() throws SQLException;
+
     /*boolean save(Alumno alumno);
     boolean update(Alumno alumno);
     boolean delete(Long id);*/

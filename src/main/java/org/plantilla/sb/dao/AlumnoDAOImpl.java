@@ -32,7 +32,12 @@ public class AlumnoDAOImpl implements AlumnoDAO {
                 Alumno a = new Alumno();
                 a.setId(rs.getLong("id"));
                 a.setNombre(rs.getString("nombre"));
+                a.setApellido(rs.getString("apellido"));
                 a.setEmail(rs.getString("email"));
+                a.setEdad(rs.getInt("edad"));
+                a.setCursoId(rs.getLong("curso_id"));
+                List<Curso> cursos = getCursosByAlumnoId(a.getId());
+                a.setCursos(new java.util.HashSet<>(cursos));
                 alumnos.add(a);
             }
         }
@@ -42,13 +47,21 @@ public class AlumnoDAOImpl implements AlumnoDAO {
 
     @Override
     public void insertAlumno(Alumno alumno) throws SQLException {
-        String sql = "INSERT INTO alumno (nombre, email) VALUES (?, ?)";
+        String sql = "INSERT INTO alumno (nombre, apellido, email, edad, curso_id) VALUES (?, ?, ?, ?, ?)";
 
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, alumno.getNombre());
-            ps.setString(2, alumno.getEmail());
+            ps.setString(2, alumno.getApellido());
+            ps.setString(3, alumno.getEmail());
+            ps.setInt(4, alumno.getEdad() != null ? alumno.getEdad() : 0);
+
+            if (alumno.getCursoId() != null) {
+                ps.setLong(5, alumno.getCursoId());
+            } else {
+                ps.setNull(5, java.sql.Types.BIGINT);
+            }
 
             ps.executeUpdate();
         }
@@ -56,15 +69,23 @@ public class AlumnoDAOImpl implements AlumnoDAO {
 
     @Override
     public void updateAlumno(Alumno alumno) throws SQLException {
-        String sql = "UPDATE alumno SET nombre=?, email=? WHERE id=?";
+        String sql = "UPDATE alumno SET nombre=?, apellido=?, email=?, edad=?, curso_id=? WHERE id=?";
 
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, alumno.getNombre());
-            ps.setString(2, alumno.getEmail());
-            ps.setLong(3, alumno.getId());
+            ps.setString(2, alumno.getApellido());
+            ps.setString(3, alumno.getEmail());
+            ps.setInt(4, alumno.getEdad() != null ? alumno.getEdad() : 0);
 
+            if (alumno.getCursoId() != null) {
+                ps.setLong(5, alumno.getCursoId());
+            } else {
+                ps.setNull(5, java.sql.Types.BIGINT);
+            }
+
+            ps.setLong(6, alumno.getId());
             ps.executeUpdate();
         }
     }
@@ -96,7 +117,10 @@ public class AlumnoDAOImpl implements AlumnoDAO {
                     alumno = new Alumno();
                     alumno.setId(rs.getLong("id"));
                     alumno.setNombre(rs.getString("nombre"));
+                    alumno.setApellido(rs.getString("apellido"));
                     alumno.setEmail(rs.getString("email"));
+                    alumno.setEdad(rs.getInt("edad"));
+                    alumno.setCursoId(rs.getLong("curso_id"));
                 }
             }
         }
@@ -160,5 +184,25 @@ public class AlumnoDAOImpl implements AlumnoDAO {
             ps.executeUpdate();
         }
     }
+
+    @Override
+    public List<Curso> listAllCursos() throws SQLException {
+        String sql = "SELECT * FROM curso";
+        List<Curso> cursos = new ArrayList<>();
+
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                Curso curso = new Curso();
+                curso.setId(rs.getLong("id"));
+                curso.setNombre(rs.getString("nombre"));
+                cursos.add(curso);
+            }
+        }
+        return cursos;
+    }
+
 }
 

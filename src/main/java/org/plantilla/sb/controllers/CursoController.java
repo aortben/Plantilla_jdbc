@@ -1,84 +1,89 @@
 package org.plantilla.sb.controllers;
 
 import org.plantilla.sb.dao.CursoDAO;
+import org.plantilla.sb.dao.ProfesorDAO;
 import org.plantilla.sb.entities.Curso;
 import org.plantilla.sb.entities.Profesor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.SQLException;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
-@RestController
+@Controller
 @RequestMapping("/cursos")
 public class CursoController {
 
     @Autowired
     private CursoDAO cursoDAO;
 
+    @Autowired
+    private ProfesorDAO profesorDAO; // Para listar todos los profesores en el select
+
+    // Listar todos los cursos
     @GetMapping
-    public List<Curso> getAllCursos() throws SQLException {
-        return cursoDAO.listAllCursos();
+    public String listCursos(Model model) throws SQLException {
+        model.addAttribute("cursos", cursoDAO.listAllCursos());
+        return "cursos"; // nombre del HTML para listar cursos
     }
 
-    @GetMapping("/{id}")
-    public Curso getCurso(@PathVariable Long id) throws SQLException {
-        return cursoDAO.getCursoById(id);
+    // Mostrar formulario para crear nuevo curso
+    @GetMapping("/new")
+    public String newCursoForm(Model model) throws SQLException {
+        model.addAttribute("curso", new Curso());
+        model.addAttribute("todosProfesores", profesorDAO.listAllProfesores());
+        return "cursos-form"; // nombre del HTML del formulario
+    }
+
+    // Mostrar formulario para editar curso
+    @GetMapping("/edit/{id}")
+    public String editCursoForm(@PathVariable Long id, Model model) throws SQLException {
+        Curso curso = cursoDAO.getCursoById(id);
+        model.addAttribute("curso", curso);
+        model.addAttribute("todosProfesores", profesorDAO.listAllProfesores());
+        return "cursos-form";
     }
 
     @PostMapping
-    public String createCurso(@RequestBody Curso curso) {
+    public String saveCurso(@ModelAttribute Curso curso) {
         try {
-            cursoDAO.insertCurso(curso);
-            return "Curso creado correctamente";
+            // Llenar la lista de Profesores según los IDs seleccionados
+            Set<Profesor> profesoresSeleccionados = new HashSet<>();
+            for (Long id : curso.getProfesorIds()) {
+                Profesor p = profesorDAO.getProfesorById(id);
+                if (p != null) {
+                    profesoresSeleccionados.add(p);
+                }
+            }
+            curso.setProfesores(profesoresSeleccionados);
+
+            if (curso.getId() == null) {
+                cursoDAO.insertCurso(curso);
+            } else {
+                cursoDAO.updateCurso(curso);
+            }
+            return "redirect:/cursos";
         } catch (SQLException e) {
-            return "Error al crear curso: " + e.getMessage();
+            e.printStackTrace();
+            return "error";
         }
     }
 
-    @PutMapping("/{id}")
-    public String updateCurso(@PathVariable Long id, @RequestBody Curso curso) {
-        try {
-            curso.setId(id);
-            cursoDAO.updateCurso(curso);
-            return "Curso actualizado correctamente";
-        } catch (SQLException e) {
-            return "Error al actualizar curso: " + e.getMessage();
-        }
-    }
-
-    @DeleteMapping("/{id}")
+    // Borrar curso
+    @GetMapping("/delete/{id}")
     public String deleteCurso(@PathVariable Long id) {
         try {
             cursoDAO.deleteCurso(id);
-            return "Curso eliminado correctamente";
+            return "redirect:/cursos";
         } catch (SQLException e) {
-            return "Error al eliminar curso: " + e.getMessage();
+            e.printStackTrace();
+            return "error";
         }
     }
 
-    @GetMapping("/{id}/profesores")
-    public List<Profesor> getProfesores(@PathVariable Long id) throws SQLException {
-        return cursoDAO.getProfesoresByCursoId(id);
-    }
 
-    @PostMapping("/{id}/profesores/{profesorId}")
-    public String addProfesor(@PathVariable Long id, @PathVariable Long profesorId) {
-        try {
-            cursoDAO.addProfesorToCurso(id, profesorId);
-            return "Profesor añadido al curso";
-        } catch (SQLException e) {
-            return "Error: " + e.getMessage();
-        }
-    }
-
-    @DeleteMapping("/{id}/profesores/{profesorId}")
-    public String removeProfesor(@PathVariable Long id, @PathVariable Long profesorId) {
-        try {
-            cursoDAO.removeProfesorFromCurso(id, profesorId);
-            return "Profesor eliminado del curso";
-        } catch (SQLException e) {
-            return "Error: " + e.getMessage();
-        }
-    }
 }
