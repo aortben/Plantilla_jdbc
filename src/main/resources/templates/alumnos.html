@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<th:block th:replace="fragments/head :: head('Alumnos')"></th:block>
+<body>
+<th:block th:replace="fragments/header :: header"></th:block>
+
+<div class="container mt-5 pt-5">
+    <h2>Lista de Alumnos</h2>
+    <a th:href="@{/alumnos/new}" class="btn btn-primary mb-3">Nuevo Alumno</a>
+
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>ID</th><th>Nombre</th><th>Apellido</th><th>Edad</th><th>Email</th><th>Curso ID</th><th>Acciones</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="alumno : ${alumnos}">
+            <td th:text="${alumno.id}"></td>
+            <td th:text="${alumno.nombre}"></td>
+            <td th:text="${alumno.apellido}"></td>
+            <td th:text="${alumno.edad}"></td>
+            <td th:text="${alumno.email}"></td>
+            <td th:text="${alumno.cursoId}"></td>
+            <td>
+                <a th:href="@{'/alumnos/edit/' + ${alumno.id}}" class="btn btn-sm btn-warning">Editar</a>
+                <a th:href="@{'/alumnos/delete/' + ${alumno.id}}" class="btn btn-sm btn-danger">Borrar</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<th:block th:replace="fragments/footer :: footer"></th:block>
+</body>
+</html>

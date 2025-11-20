@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<th:block th:replace="fragments/head :: head('Profesores')"></th:block>
+<body>
+<th:block th:replace="fragments/header :: header"></th:block>
+
+<div class="container mt-5 pt-5">
+    <h2>Lista de Profesores</h2>
+    <a th:href="@{/profesores/new}" class="btn btn-primary mb-3">Nuevo Profesor</a>
+
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>ID</th><th>Nombre</th><th>Apellido</th><th>Cursos</th><th>Acciones</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="profesor : ${profesores}">
+            <td th:text="${profesor.id}"></td>
+            <td th:text="${profesor.nombre}"></td>
+            <td th:text="${profesor.apellido}"></td>
+            <td>
+                <span th:each="curso : ${profesor.cursos}" th:text="${curso.nombre} + ', '"></span>
+            </td>
+            <td>
+                <a th:href="@{'/profesores/edit/' + ${profesor.id}}" class="btn btn-sm btn-warning">Editar</a>
+                <a th:href="@{'/profesores/delete/' + ${profesor.id}}" class="btn btn-sm btn-danger">Borrar</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<th:block th:replace="fragments/footer :: footer"></th:block>
+</body>
+</html>

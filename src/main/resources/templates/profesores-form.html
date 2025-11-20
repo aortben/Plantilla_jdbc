@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<th:block th:replace="fragments/head :: head('Formulario Profesor')"></th:block>
+<body>
+<th:block th:replace="fragments/header :: header"></th:block>
+
+<div class="container mt-5 pt-5">
+    <h2 th:text="${profesor.id == null} ? 'Nuevo Profesor' : 'Editar Profesor'"></h2>
+
+    <form th:action="@{${profesor.id == null} ? '/profesores' : '/profesores/' + ${profesor.id}}" th:object="${profesor}" method="post">
+        <div class="mb-3">
+            <label class="form-label">Nombre:</label>
+            <input type="text" th:field="*{nombre}" class="form-control" required/>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Apellido:</label>
+            <input type="text" th:field="*{apellido}" class="form-control" required/>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Cursos:</label>
+            <select th:field="*{cursos}" multiple class="form-select">
+                <option th:each="curso : ${todosCursos}"
+                        th:value="${curso.id}"
+                        th:text="${curso.nombre}"
+                        th:selected="${profesor.cursos.contains(curso)}">
+                </option>
+            </select>
+            <small class="form-text text-muted">Mantén presionada Ctrl (Windows) o Cmd (Mac) para seleccionar varios cursos.</small>
+        </div>
+
+        <button type="submit" class="btn btn-success">Guardar</button>
+        <a th:href="@{/profesores}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+
+<th:block th:replace="fragments/footer :: footer"></th:block>
+</body>
+</html>

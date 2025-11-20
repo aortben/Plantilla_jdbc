@@ -1,9 +1,4 @@
 package org.plantilla.sb.entities;
-
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import lombok.Data;
 
 @Data
@@ -13,6 +8,7 @@ public class Alumno {
     private String nombre;
     private String apellido;
     private int edad;
+    private String email;
 
     // En una relación 1:N, el N lleva la FK
     private Long cursoId;

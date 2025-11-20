@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<th:block th:replace="fragments/head :: head('Cursos')"></th:block>
+<body>
+<th:block th:replace="fragments/header :: header"></th:block>
+
+<div class="container mt-5 pt-5">
+    <h2>Lista de Cursos</h2>
+    <a th:href="@{/cursos/new}" class="btn btn-primary mb-3">Nuevo Curso</a>
+
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>ID</th><th>Nombre</th><th>Profesores</th><th>Acciones</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="curso : ${cursos}">
+            <td th:text="${curso.id}"></td>
+            <td th:text="${curso.nombre}"></td>
+            <td>
+                <span th:each="profesor : ${curso.profesores}" th:text="${profesor.nombre + ' ' + profesor.apellido} + ', '"></span>
+            </td>
+            <td>
+                <a th:href="@{'/cursos/edit/' + ${curso.id}}" class="btn btn-sm btn-warning">Editar</a>
+                <a th:href="@{'/cursos/delete/' + ${curso.id}}" class="btn btn-sm btn-danger">Borrar</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<th:block th:replace="fragments/footer :: footer"></th:block>
+</body>
+</html>
