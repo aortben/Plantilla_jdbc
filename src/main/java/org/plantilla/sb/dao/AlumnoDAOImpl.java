@@ -6,10 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,7 +17,7 @@ public class AlumnoDAOImpl implements AlumnoDAO {
     private DataSource dataSource;
 
     @Override
-    public List<Alumno> listAllAlumnos() throws SQLException {
+    public List<Alumno> list() throws SQLException {
         String sql = "SELECT * FROM alumno";
         List<Alumno> alumnos = new ArrayList<>();
 
@@ -36,7 +33,7 @@ public class AlumnoDAOImpl implements AlumnoDAO {
                 a.setEmail(rs.getString("email"));
                 a.setEdad(rs.getInt("edad"));
                 a.setCursoId(rs.getLong("curso_id"));
-                List<Curso> cursos = getCursosByAlumnoId(a.getId());
+                List<Curso> cursos = getRelacionados(a.getId());
                 a.setCursos(new java.util.HashSet<>(cursos));
                 alumnos.add(a);
             }
@@ -46,11 +43,11 @@ public class AlumnoDAOImpl implements AlumnoDAO {
     }
 
     @Override
-    public void insertAlumno(Alumno alumno) throws SQLException {
+    public void insert(Alumno alumno) throws SQLException {
         String sql = "INSERT INTO alumno (nombre, apellido, email, edad, curso_id) VALUES (?, ?, ?, ?, ?)";
 
         try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+             PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             ps.setString(1, alumno.getNombre());
             ps.setString(2, alumno.getApellido());
@@ -64,11 +61,17 @@ public class AlumnoDAOImpl implements AlumnoDAO {
             }
 
             ps.executeUpdate();
+
+            try (ResultSet generatedKeys = ps.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    alumno.setId(generatedKeys.getLong(1));
+                }
+            }
         }
     }
 
     @Override
-    public void updateAlumno(Alumno alumno) throws SQLException {
+    public void update(Alumno alumno) throws SQLException {
         String sql = "UPDATE alumno SET nombre=?, apellido=?, email=?, edad=?, curso_id=? WHERE id=?";
 
         try (Connection conn = dataSource.getConnection();
@@ -91,7 +94,7 @@ public class AlumnoDAOImpl implements AlumnoDAO {
     }
 
     @Override
-    public void deleteAlumno(Long id) throws SQLException {
+    public void delete(Long id) throws SQLException {
         String sql = "DELETE FROM alumno WHERE id=?";
 
         try (Connection conn = dataSource.getConnection();
@@ -103,7 +106,7 @@ public class AlumnoDAOImpl implements AlumnoDAO {
     }
 
     @Override
-    public Alumno getAlumnoById(Long id) throws SQLException {
+    public Alumno getById(Long id) throws SQLException {
         String sql = "SELECT * FROM alumno WHERE id=?";
         Alumno alumno = null;
 
@@ -129,7 +132,7 @@ public class AlumnoDAOImpl implements AlumnoDAO {
     }
 
     @Override
-    public List<Curso> getCursosByAlumnoId(Long alumnoId) throws SQLException {
+    public List<Curso> getRelacionados(Long alumnoId) throws SQLException {
         String sql = """
                 SELECT c.id, c.nombre
                 FROM curso c
@@ -158,7 +161,7 @@ public class AlumnoDAOImpl implements AlumnoDAO {
     }
 
     @Override
-    public void addCursoToAlumno(Long alumnoId, Long cursoId) throws SQLException {
+    public void addRelacion(Long alumnoId, Long cursoId) throws SQLException {
         String sql = "INSERT INTO alumno_curso (alumno_id, curso_id) VALUES (?, ?)";
 
         try (Connection conn = dataSource.getConnection();
@@ -172,7 +175,7 @@ public class AlumnoDAOImpl implements AlumnoDAO {
     }
 
     @Override
-    public void removeCursoFromAlumno(Long alumnoId, Long cursoId) throws SQLException {
+    public void removeRelacion(Long alumnoId, Long cursoId) throws SQLException {
         String sql = "DELETE FROM alumno_curso WHERE alumno_id=? AND curso_id=?";
 
         try (Connection conn = dataSource.getConnection();
@@ -186,7 +189,7 @@ public class AlumnoDAOImpl implements AlumnoDAO {
     }
 
     @Override
-    public List<Curso> listAllCursos() throws SQLException {
+    public List<Curso> listCursos() throws SQLException {
         String sql = "SELECT * FROM curso";
         List<Curso> cursos = new ArrayList<>();
 

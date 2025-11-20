@@ -11,17 +11,19 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
+// JDBC PURO: Sin JPA ni ORM. Toda la persistencia se gestiona manualmente con SQL.
 @Repository
 public class ProfesorDAOImpl implements ProfesorDAO {
 
+    // PATRÓN REUTILIZABLE: DataSource inyectado para obtener conexiones JDBC
+    // Usa find and replace: "ProfesorDAOImpl" -> "NuevoDAOImpl" para duplicar este patrón
     @Autowired
     private DataSource dataSource;
 
-    // -------------------------------------------------------
-    // LIST ALL
-    // -------------------------------------------------------
+    // JDBC PURO: Try-with-resources cierra automáticamente Connection, PreparedStatement y ResultSet
+    // Patrón genérico: SELECT, mapear ResultSet a entidades, cargar relaciones N:M
     @Override
-    public List<Profesor> listAllProfesores() throws SQLException {
+    public List<Profesor> list() throws SQLException {
         List<Profesor> profesores = new ArrayList<>();
         String sql = "SELECT id, nombre, apellido FROM profesor";
 
@@ -34,7 +36,7 @@ public class ProfesorDAOImpl implements ProfesorDAO {
                 profesor.setId(rs.getLong("id"));
                 profesor.setNombre(rs.getString("nombre"));
                 profesor.setApellido(rs.getString("apellido"));
-                List<Curso> cursos = getCursosByProfesorId(profesor.getId());
+                List<Curso> cursos = getRelacionados(profesor.getId());
                 profesor.setCursos(new HashSet<>(cursos));
                 profesores.add(profesor);
             }
@@ -43,28 +45,30 @@ public class ProfesorDAOImpl implements ProfesorDAO {
         return profesores;
     }
 
-    // -------------------------------------------------------
-    // INSERT
-    // -------------------------------------------------------
+    // JDBC PURO - INSERT: PreparedStatement con Statement.RETURN_GENERATED_KEYS
+    // CRÍTICO: Recupera el ID autogenerado para que la entidad esté disponible inmediatamente
+    // (evita consultas SQL adicionales después de insert)
     @Override
-    public void insertProfesor(Profesor profesor) throws SQLException {
+    public void insert(Profesor profesor) throws SQLException {
         String sql = "INSERT INTO profesor (nombre, apellido) VALUES (?, ?)";
 
         try (Connection conn = dataSource.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             stmt.setString(1, profesor.getNombre());
             stmt.setString(2, profesor.getApellido());
-
             stmt.executeUpdate();
+
+            try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    profesor.setId(generatedKeys.getLong(1));
+                }
+            }
         }
     }
 
-    // -------------------------------------------------------
-    // UPDATE
-    // -------------------------------------------------------
     @Override
-    public void updateProfesor(Profesor profesor) throws SQLException {
+    public void update(Profesor profesor) throws SQLException {
         String sql = "UPDATE profesor SET nombre = ?, apellido = ? WHERE id = ?";
 
         try (Connection conn = dataSource.getConnection();
@@ -78,11 +82,8 @@ public class ProfesorDAOImpl implements ProfesorDAO {
         }
     }
 
-    // -------------------------------------------------------
-    // DELETE
-    // -------------------------------------------------------
     @Override
-    public void deleteProfesor(Long id) throws SQLException {
+    public void delete(Long id) throws SQLException {
         String sql = "DELETE FROM profesor WHERE id = ?";
 
         try (Connection conn = dataSource.getConnection();
@@ -93,11 +94,8 @@ public class ProfesorDAOImpl implements ProfesorDAO {
         }
     }
 
-    // -------------------------------------------------------
-    // GET BY ID
-    // -------------------------------------------------------
     @Override
-    public Profesor getProfesorById(Long id) throws SQLException {
+    public Profesor getById(Long id) throws SQLException {
         Profesor profesor = null;
         String sql = "SELECT id, nombre, apellido FROM profesor WHERE id = ?";
 
@@ -119,11 +117,10 @@ public class ProfesorDAOImpl implements ProfesorDAO {
         return profesor;
     }
 
-    // -------------------------------------------------------
-    // GET CURSOS (N:M)
-    // -------------------------------------------------------
+    // RELACIÓN N:M - getRelacionados: carga entidades relacionadas mediante tabla de unión
+    // En este caso: Profesor <- [curso_profesor] -> Curso
     @Override
-    public List<Curso> getCursosByProfesorId(Long profesorId) throws SQLException {
+    public List<Curso> getRelacionados(Long profesorId) throws SQLException {
         List<Curso> cursos = new ArrayList<>();
         String sql = """
                 SELECT c.id, c.nombre
@@ -150,11 +147,9 @@ public class ProfesorDAOImpl implements ProfesorDAO {
         return cursos;
     }
 
-    // -------------------------------------------------------
-    // ADD CURSO TO PROFESOR (N:M)
-    // -------------------------------------------------------
+    // RELACIÓN N:M - addRelacion: crea vinculación en tabla de unión
     @Override
-    public void addCursoToProfesor(Long profesorId, Long cursoId) throws SQLException {
+    public void addRelacion(Long profesorId, Long cursoId) throws SQLException {
         String sql = "INSERT INTO curso_profesor (curso_id, profesor_id) VALUES (?, ?)";
 
         try (Connection conn = dataSource.getConnection();
@@ -167,11 +162,9 @@ public class ProfesorDAOImpl implements ProfesorDAO {
         }
     }
 
-    // -------------------------------------------------------
-    // REMOVE CURSO FROM PROFESOR (N:M)
-    // -------------------------------------------------------
+    // RELACIÓN N:M - removeRelacion: elimina vinculación de tabla de unión
     @Override
-    public void removeCursoFromProfesor(Long profesorId, Long cursoId) throws SQLException {
+    public void removeRelacion(Long profesorId, Long cursoId) throws SQLException {
         String sql = "DELETE FROM curso_profesor WHERE curso_id = ? AND profesor_id = ?";
 
         try (Connection conn = dataSource.getConnection();
@@ -182,28 +175,5 @@ public class ProfesorDAOImpl implements ProfesorDAO {
 
             stmt.executeUpdate();
         }
-    }
-
-    // -------------------------------------------------------
-    // LIST ALL CURSOS
-    // -------------------------------------------------------
-    @Override
-    public List<Curso> listAllCursos() throws SQLException {
-        List<Curso> cursos = new ArrayList<>();
-        String sql = "SELECT id, nombre FROM curso";
-
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
-
-            while (rs.next()) {
-                Curso curso = new Curso();
-                curso.setId(rs.getLong("id"));
-                curso.setNombre(rs.getString("nombre"));
-                cursos.add(curso);
-            }
-        }
-
-        return cursos;
     }
 }

@@ -16,60 +16,67 @@ import java.util.List;
 @RequestMapping("/profesores")
 public class ProfesorController {
 
+    // PATRÓN REUTILIZABLE: Usa find and replace para cambiar "ProfesorDAO" y "profesorDAO"
+    // simultáneamente en todos los métodos asociados al inyector.
     @Autowired
     private ProfesorDAO profesorDAO;
 
+    // PATRÓN REUTILIZABLE: Inyector secundario para entidades relacionadas (N:M, 1:N)
     @Autowired
     private CursoDAO cursoDAO;
 
-    // Listar todos los profesores
+    // PATRÓN GENÉRICO - Método list: obtiene todas las entidades
+    // Atributos del modelo: "items" (lista de entidades)
     @GetMapping
-    public String listProfesores(Model model) throws SQLException {
-        List<Profesor> profesores = profesorDAO.listAllProfesores();
-        model.addAttribute("profesores", profesores);
-        return "profesores"; // nombre de la plantilla Thymeleaf
+    public String list(Model model) throws SQLException {
+        List<Profesor> profesores = profesorDAO.list();
+        model.addAttribute("items", profesores);
+        return "profesores";
     }
 
-    // Formulario de nuevo profesor
+    // PATRÓN GENÉRICO - Método newForm: formulario para crear nueva entidad
+    // Atributos del modelo: "item" (entidad vacía), "relacionados" (lista de opciones)
     @GetMapping("/new")
-    public String newProfesorForm(Model model) throws SQLException {
+    public String newForm(Model model) throws SQLException {
         Profesor profesor = new Profesor();
-        List<Curso> todosCursos = cursoDAO.listAllCursos();
-        model.addAttribute("profesor", profesor);
-        model.addAttribute("todosCursos", todosCursos);
-        return "profesores-form"; // nombre de la plantilla Thymeleaf
+        List<Curso> cursos = cursoDAO.list();
+        model.addAttribute("item", profesor);
+        model.addAttribute("relacionados", cursos);
+        return "profesores-form";
     }
 
-    // Formulario de edición
+    // PATRÓN GENÉRICO - Método editForm: formulario para editar entidad existente
+    // Carga entidad, relaciones N:M y opciones disponibles
     @GetMapping("/edit/{id}")
-    public String editProfesorForm(@PathVariable Long id, Model model) throws SQLException {
-        Profesor profesor = profesorDAO.getProfesorById(id);
-        List<Curso> cursoDelProfesor = profesorDAO.getCursosByProfesorId(id);
-        for (Curso curso : cursoDelProfesor) {
+    public String editForm(@PathVariable Long id, Model model) throws SQLException {
+        Profesor profesor = profesorDAO.getById(id);
+        List<Curso> cursosRelacionados = profesorDAO.getRelacionados(id);
+        for (Curso curso : cursosRelacionados) {
             profesor.getCursoIds().add(curso.getId());
         }
-        List<Curso> todosCursos = cursoDAO.listAllCursos();
-        model.addAttribute("profesor", profesor);
-        model.addAttribute("todosCursos", todosCursos);
-        return "profesores-form"; // mismo template
+        List<Curso> cursos = cursoDAO.list();
+        model.addAttribute("item", profesor);
+        model.addAttribute("relacionados", cursos);
+        return "profesores-form";
     }
 
-    // Guardar nuevo profesor o actualizar existente
+    // PATRÓN GENÉRICO - Método save: inserta o actualiza entidad y gestiona relaciones N:M
+    // Lógica: insert si id es null, update si existe, sincroniza relaciones N:M
     @PostMapping
-    public String saveProfesor(@ModelAttribute Profesor profesor) throws SQLException {
+    public String save(@ModelAttribute Profesor profesor) throws SQLException {
         if (profesor.getId() == null) {
-            profesorDAO.insertProfesor(profesor);
+            profesorDAO.insert(profesor);
         } else {
-            profesorDAO.updateProfesor(profesor);
-            List<Curso> cursosActuales = profesorDAO.getCursosByProfesorId(profesor.getId());
+            profesorDAO.update(profesor);
+            List<Curso> cursosActuales = profesorDAO.getRelacionados(profesor.getId());
             for (Curso curso : cursosActuales) {
                 if (!profesor.getCursoIds().contains(curso.getId())) {
-                    profesorDAO.removeCursoFromProfesor(profesor.getId(), curso.getId());
+                    profesorDAO.removeRelacion(profesor.getId(), curso.getId());
                 }
             }
         }
         for (Long cursoId : profesor.getCursoIds()) {
-            List<Curso> cursosActuales = profesorDAO.getCursosByProfesorId(profesor.getId());
+            List<Curso> cursosActuales = profesorDAO.getRelacionados(profesor.getId());
             boolean existe = false;
             for (Curso curso : cursosActuales) {
                 if (curso.getId().equals(cursoId)) {
@@ -78,16 +85,16 @@ public class ProfesorController {
                 }
             }
             if (!existe) {
-                profesorDAO.addCursoToProfesor(profesor.getId(), cursoId);
+                profesorDAO.addRelacion(profesor.getId(), cursoId);
             }
         }
         return "redirect:/profesores";
     }
 
-    // Borrar profesor
+    // PATRÓN GENÉRICO - Método delete: elimina entidad por ID
     @GetMapping("/delete/{id}")
-    public String deleteProfesor(@PathVariable Long id) throws SQLException {
-        profesorDAO.deleteProfesor(id);
+    public String delete(@PathVariable Long id) throws SQLException {
+        profesorDAO.delete(id);
         return "redirect:/profesores";
     }
 }

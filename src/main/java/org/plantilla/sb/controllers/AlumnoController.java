@@ -19,60 +19,53 @@ public class AlumnoController {
     @Autowired
     private AlumnoDAO alumnoDAO;
 
-    // Lista alumnos para Thymeleaf
     @GetMapping
-    public String listarAlumnos(Model model) throws SQLException {
-        List<Alumno> alumnos = alumnoDAO.listAllAlumnos();
-        model.addAttribute("alumnos", alumnos);
+    public String list(Model model) throws SQLException {
+        List<Alumno> alumnos = alumnoDAO.list();
+        model.addAttribute("items", alumnos);
         return "alumnos";
     }
 
     @GetMapping("/new")
-    public String nuevoAlumno(Model model) throws SQLException {
+    public String newForm(Model model) throws SQLException {
         Alumno alumno = new Alumno();
-        model.addAttribute("alumno", alumno);
-
-        List<Curso> todosCursos = alumnoDAO.listAllCursos();
-        model.addAttribute("todosCursos", todosCursos);
-
+        model.addAttribute("item", alumno);
+        List<Curso> cursos = alumnoDAO.listCursos();
+        model.addAttribute("relacionados", cursos);
         return "alumnos-form";
     }
 
-    // Formulario para editar alumno
     @GetMapping("/{id}/edit")
-    public String editarAlumno(@PathVariable Long id, Model model) throws SQLException {
-        Alumno alumno = alumnoDAO.getAlumnoById(id);
+    public String editForm(@PathVariable Long id, Model model) throws SQLException {
+        Alumno alumno = alumnoDAO.getById(id);
         if (alumno == null) {
             return "redirect:/alumnos";
         }
-        List<Curso> cursosDelAlumno = alumnoDAO.getCursosByAlumnoId(id);
+        List<Curso> cursosDelAlumno = alumnoDAO.getRelacionados(id);
         for (Curso curso : cursosDelAlumno) {
             alumno.getCursoIds().add(curso.getId());
         }
-        model.addAttribute("alumno", alumno);
-
-        List<Curso> todosCursos = alumnoDAO.listAllCursos();
-        model.addAttribute("todosCursos", todosCursos);
-
+        model.addAttribute("item", alumno);
+        List<Curso> cursos = alumnoDAO.listCursos();
+        model.addAttribute("relacionados", cursos);
         return "alumnos-form";
     }
 
-    // Guardar alumno (nuevo o editado)
     @PostMapping
-    public String guardarAlumno(@ModelAttribute Alumno alumno) throws SQLException {
+    public String save(@ModelAttribute Alumno alumno) throws SQLException {
         if (alumno.getId() == null) {
-            alumnoDAO.insertAlumno(alumno);
+            alumnoDAO.insert(alumno);
         } else {
-            alumnoDAO.updateAlumno(alumno);
-            List<Curso> cursosActuales = alumnoDAO.getCursosByAlumnoId(alumno.getId());
+            alumnoDAO.update(alumno);
+            List<Curso> cursosActuales = alumnoDAO.getRelacionados(alumno.getId());
             for (Curso curso : cursosActuales) {
                 if (!alumno.getCursoIds().contains(curso.getId())) {
-                    alumnoDAO.removeCursoFromAlumno(alumno.getId(), curso.getId());
+                    alumnoDAO.removeRelacion(alumno.getId(), curso.getId());
                 }
             }
         }
         for (Long cursoId : alumno.getCursoIds()) {
-            List<Curso> cursosActuales = alumnoDAO.getCursosByAlumnoId(alumno.getId());
+            List<Curso> cursosActuales = alumnoDAO.getRelacionados(alumno.getId());
             boolean existe = false;
             for (Curso curso : cursosActuales) {
                 if (curso.getId().equals(cursoId)) {
@@ -81,16 +74,15 @@ public class AlumnoController {
                 }
             }
             if (!existe) {
-                alumnoDAO.addCursoToAlumno(alumno.getId(), cursoId);
+                alumnoDAO.addRelacion(alumno.getId(), cursoId);
             }
         }
         return "redirect:/alumnos";
     }
 
-    // Borrar alumno
     @GetMapping("/delete/{id}")
-    public String borrarAlumno(@PathVariable Long id) throws SQLException {
-        alumnoDAO.deleteAlumno(id);
+    public String delete(@PathVariable Long id) throws SQLException {
+        alumnoDAO.delete(id);
         return "redirect:/alumnos";
     }
 }

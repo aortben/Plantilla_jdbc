@@ -15,16 +15,16 @@
         </tr>
         </thead>
         <tbody>
-        <tr th:each="alumno : ${alumnos}">
-            <td th:text="${alumno.id}"></td>
-            <td th:text="${alumno.nombre}"></td>
-            <td th:text="${alumno.apellido}"></td>
-            <td th:text="${alumno.edad}"></td>
-            <td th:text="${alumno.email}"></td>
-            <td th:text="${alumno.cursoId}"></td>
+        <tr th:each="item : ${items}">
+            <td th:text="${item.id}"></td>
+            <td th:text="${item.nombre}"></td>
+            <td th:text="${item.apellido}"></td>
+            <td th:text="${item.edad}"></td>
+            <td th:text="${item.email}"></td>
+            <td th:text="${item.cursoId}"></td>
             <td>
-                <a th:href="@{'/alumnos/' + ${alumno.id} + '/edit'}" class="btn btn-sm btn-warning">Editar</a>
-                <a th:href="@{'/alumnos/delete/' + ${alumno.id}}" class="btn btn-sm btn-danger">Borrar</a>
+                <a th:href="@{'/alumnos/' + ${item.id} + '/edit'}" class="btn btn-sm btn-warning">Editar</a>
+                <a th:href="@{'/alumnos/delete/' + ${item.id}}" class="btn btn-sm btn-danger">Borrar</a>
             </td>
         </tr>
         </tbody>

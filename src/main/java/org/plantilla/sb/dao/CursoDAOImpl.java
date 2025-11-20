@@ -12,17 +12,16 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+// JDBC PURO: Gestiona relaciones N:M (Profesor-Curso) y 1:N (Curso-RA)
 @Repository
 public class CursoDAOImpl implements CursoDAO {
 
+    // PATRÓN REUTILIZABLE: Usa find and replace "CursoDAOImpl" para duplicar estructura a otras entidades
     @Autowired
     private DataSource dataSource;
 
-    // -------------------------------------------------------
-    // LIST ALL
-    // -------------------------------------------------------
     @Override
-    public List<Curso> listAllCursos() throws SQLException {
+    public List<Curso> list() throws SQLException {
         List<Curso> cursos = new ArrayList<>();
 
         String sql = "SELECT id, nombre FROM curso";
@@ -43,27 +42,26 @@ public class CursoDAOImpl implements CursoDAO {
         return cursos;
     }
 
-    // -------------------------------------------------------
-    // INSERT
-    // -------------------------------------------------------
     @Override
-    public void insertCurso(Curso curso) throws SQLException {
+    public void insert(Curso curso) throws SQLException {
         String sql = "INSERT INTO curso (nombre) VALUES (?)";
 
         try (Connection conn = dataSource.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             stmt.setString(1, curso.getNombre());
-
             stmt.executeUpdate();
+
+            try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    curso.setId(generatedKeys.getLong(1));
+                }
+            }
         }
     }
 
-    // -------------------------------------------------------
-    // UPDATE
-    // -------------------------------------------------------
     @Override
-    public void updateCurso(Curso curso) throws SQLException {
+    public void update(Curso curso) throws SQLException {
         String sql = "UPDATE curso SET nombre = ? WHERE id = ?";
 
         try (Connection conn = dataSource.getConnection();
@@ -76,11 +74,8 @@ public class CursoDAOImpl implements CursoDAO {
         }
     }
 
-    // -------------------------------------------------------
-    // DELETE
-    // -------------------------------------------------------
     @Override
-    public void deleteCurso(Long id) throws SQLException {
+    public void delete(Long id) throws SQLException {
         String sql = "DELETE FROM curso WHERE id = ?";
 
         try (Connection conn = dataSource.getConnection();
@@ -91,11 +86,8 @@ public class CursoDAOImpl implements CursoDAO {
         }
     }
 
-    // -------------------------------------------------------
-    // GET BY ID
-    // -------------------------------------------------------
     @Override
-    public Curso getCursoById(Long id) throws SQLException {
+    public Curso getById(Long id) throws SQLException {
         String sql = "SELECT id, nombre FROM curso WHERE id = ?";
 
         Curso curso = null;
@@ -118,11 +110,8 @@ public class CursoDAOImpl implements CursoDAO {
         return curso;
     }
 
-    // -------------------------------------------------------
-    // GET PROFESORES (N:M)
-    // -------------------------------------------------------
     @Override
-    public List<Profesor> getProfesoresByCursoId(Long cursoId) throws SQLException {
+    public List<Profesor> getRelacionados(Long cursoId) throws SQLException {
         List<Profesor> profesores = new ArrayList<>();
 
         String sql = """
@@ -153,11 +142,8 @@ public class CursoDAOImpl implements CursoDAO {
         return profesores;
     }
 
-    // -------------------------------------------------------
-    // ADD PROFESOR TO CURSO (N:M)
-    // -------------------------------------------------------
     @Override
-    public void addProfesorToCurso(Long cursoId, Long profesorId) throws SQLException {
+    public void addRelacion(Long cursoId, Long profesorId) throws SQLException {
         String sql = "INSERT INTO curso_profesor (curso_id, profesor_id) VALUES (?, ?)";
 
         try (Connection conn = dataSource.getConnection();
@@ -170,11 +156,8 @@ public class CursoDAOImpl implements CursoDAO {
         }
     }
 
-    // -------------------------------------------------------
-    // REMOVE PROFESOR FROM CURSO (N:M)
-    // -------------------------------------------------------
     @Override
-    public void removeProfesorFromCurso(Long cursoId, Long profesorId) throws SQLException {
+    public void removeRelacion(Long cursoId, Long profesorId) throws SQLException {
         String sql = "DELETE FROM curso_profesor WHERE curso_id = ? AND profesor_id = ?";
 
         try (Connection conn = dataSource.getConnection();

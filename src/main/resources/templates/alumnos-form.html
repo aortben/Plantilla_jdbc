@@ -5,43 +5,37 @@
 <th:block th:replace="fragments/header :: header"></th:block>
 
 <div class="container mt-5 pt-5">
-    <h2 th:text="${alumno.id == null} ? 'Nuevo Alumno' : 'Editar Alumno'"></h2>
+    <h2 th:text="${item.id == null} ? 'Nuevo Alumno' : 'Editar Alumno'"></h2>
 
-    <form th:action="@{/alumnos}" th:object="${alumno}" method="post">
-        <!-- ID oculto -->
+    <form th:action="@{/alumnos}" th:object="${item}" method="post">
         <input type="hidden" th:field="*{id}" />
-        <!-- Nombre -->
         <div class="mb-3">
             <label class="form-label">Nombre:</label>
             <input type="text" th:field="*{nombre}" class="form-control" required/>
         </div>
 
-        <!-- Apellido -->
         <div class="mb-3">
             <label class="form-label">Apellido:</label>
             <input type="text" th:field="*{apellido}" class="form-control" required/>
         </div>
 
-        <!-- Edad -->
         <div class="mb-3">
             <label class="form-label">Edad:</label>
             <input type="number" th:field="*{edad}" class="form-control" min="1" required/>
         </div>
 
-        <!-- Email -->
         <div class="mb-3">
             <label class="form-label">Email:</label>
             <input type="email" th:field="*{email}" class="form-control" required/>
         </div>
 
-        <!-- Cursos N:M -->
         <div class="mb-3">
             <label class="form-label">Cursos:</label>
             <select th:field="*{cursoIds}" multiple class="form-select">
-                <option th:each="curso : ${todosCursos}"
+                <option th:each="curso : ${relacionados}"
                         th:value="${curso.id}"
                         th:text="${curso.nombre}"
-                        th:selected="${alumno.cursoIds.contains(curso.id)}">
+                        th:selected="${item.cursoIds.contains(curso.id)}">
                 </option>
             </select>
             <small class="form-text text-muted">

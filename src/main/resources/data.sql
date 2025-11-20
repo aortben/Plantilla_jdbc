@@ -38,3 +38,10 @@ INSERT INTO ra (id, nombre, descripcion, curso_id) VALUES (3, 'RA1: Mecánica cl
 INSERT INTO ra (id, nombre, descripcion, curso_id) VALUES (4, 'RA2: Termodinámica', 'Conocer principios de termodinámica', 2);
 INSERT INTO ra (id, nombre, descripcion, curso_id) VALUES (5, 'RA1: Período histórico', 'Analizar eventos históricos importantes', 3);
 
+-- ------------------------
+-- Aulas
+-- ------------------------
+INSERT INTO aula (id, nombre, edificio, planta, curso_id) VALUES (1, 'A-101', 'Bloque A', 1, 1);
+INSERT INTO aula (id, nombre, edificio, planta, curso_id) VALUES (2, 'B-201', 'Bloque B', 2, 2);
+INSERT INTO aula (id, nombre, edificio, planta, curso_id) VALUES (3, 'A-205', 'Bloque A', 2, 3);
+

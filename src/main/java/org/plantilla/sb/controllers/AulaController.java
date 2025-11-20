@@ -1,8 +1,8 @@
 package org.plantilla.sb.controllers;
 
-import org.plantilla.sb.dao.RADAO;
+import org.plantilla.sb.dao.AulaDAO;
 import org.plantilla.sb.dao.CursoDAO;
-import org.plantilla.sb.entities.RA;
+import org.plantilla.sb.entities.Aula;
 import org.plantilla.sb.entities.Curso;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -13,53 +13,50 @@ import java.sql.SQLException;
 import java.util.List;
 
 @Controller
-@RequestMapping("/ra")
-public class RAController {
+@RequestMapping("/aulas")
+public class AulaController {
 
     @Autowired
-    private RADAO raDAO;
+    private AulaDAO aulaDAO;
 
     @Autowired
     private CursoDAO cursoDAO;
 
     @GetMapping
     public String list(Model model) throws SQLException {
-        List<RA> items = raDAO.list();
-        model.addAttribute("items", items);
-        return "ra";
+        model.addAttribute("items", aulaDAO.list());
+        return "aulas";
     }
 
     @GetMapping("/new")
     public String newForm(Model model) throws SQLException {
-        RA ra = new RA();
-        model.addAttribute("item", ra);
-        List<Curso> cursos = cursoDAO.list();
-        model.addAttribute("relacionados", cursos);
-        return "ra-form";
+        Aula aula = new Aula();
+        model.addAttribute("item", aula);
+        model.addAttribute("relacionados", cursoDAO.list());
+        return "aulas-form";
     }
 
     @GetMapping("/edit/{id}")
     public String editForm(@PathVariable Long id, Model model) throws SQLException {
-        RA ra = raDAO.getById(id);
-        model.addAttribute("item", ra);
-        List<Curso> cursos = cursoDAO.list();
-        model.addAttribute("relacionados", cursos);
-        return "ra-form";
+        Aula aula = aulaDAO.getById(id);
+        model.addAttribute("item", aula);
+        model.addAttribute("relacionados", cursoDAO.list());
+        return "aulas-form";
     }
 
     @PostMapping
-    public String save(@ModelAttribute RA ra) throws SQLException {
-        if (ra.getId() == null) {
-            raDAO.insert(ra);
+    public String save(@ModelAttribute Aula aula) throws SQLException {
+        if (aula.getId() == null) {
+            aulaDAO.insert(aula);
         } else {
-            raDAO.update(ra);
+            aulaDAO.update(aula);
         }
-        return "redirect:/ra";
+        return "redirect:/aulas";
     }
 
     @GetMapping("/delete/{id}")
     public String delete(@PathVariable Long id) throws SQLException {
-        raDAO.delete(id);
-        return "redirect:/ra";
+        aulaDAO.delete(id);
+        return "redirect:/aulas";
     }
 }

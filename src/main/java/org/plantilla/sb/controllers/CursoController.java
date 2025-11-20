@@ -24,37 +24,37 @@ public class CursoController {
     @Autowired
     private ProfesorDAO profesorDAO; // Para listar todos los profesores en el select
 
-    // Listar todos los cursos
     @GetMapping
-    public String listCursos(Model model) throws SQLException {
-        model.addAttribute("cursos", cursoDAO.listAllCursos());
-        return "cursos"; // nombre del HTML para listar cursos
+    public String list(Model model) throws SQLException {
+        model.addAttribute("items", cursoDAO.list());
+        return "cursos";
     }
 
-    // Mostrar formulario para crear nuevo curso
     @GetMapping("/new")
-    public String newCursoForm(Model model) throws SQLException {
-        model.addAttribute("curso", new Curso());
-        model.addAttribute("todosProfesores", profesorDAO.listAllProfesores());
-        return "cursos-form"; // nombre del HTML del formulario
+    public String newForm(Model model) throws SQLException {
+        model.addAttribute("item", new Curso());
+        model.addAttribute("relacionados", profesorDAO.list());
+        return "cursos-form";
     }
 
-    // Mostrar formulario para editar curso
     @GetMapping("/edit/{id}")
-    public String editCursoForm(@PathVariable Long id, Model model) throws SQLException {
-        Curso curso = cursoDAO.getCursoById(id);
-        model.addAttribute("curso", curso);
-        model.addAttribute("todosProfesores", profesorDAO.listAllProfesores());
+    public String editForm(@PathVariable Long id, Model model) throws SQLException {
+        Curso curso = cursoDAO.getById(id);
+        List<Profesor> profesoresRelacionados = cursoDAO.getRelacionados(id);
+        for (Profesor profesor : profesoresRelacionados) {
+            curso.getProfesorIds().add(profesor.getId());
+        }
+        model.addAttribute("item", curso);
+        model.addAttribute("relacionados", profesorDAO.list());
         return "cursos-form";
     }
 
     @PostMapping
-    public String saveCurso(@ModelAttribute Curso curso) {
+    public String save(@ModelAttribute Curso curso) {
         try {
-            // Llenar la lista de Profesores según los IDs seleccionados
             Set<Profesor> profesoresSeleccionados = new HashSet<>();
             for (Long id : curso.getProfesorIds()) {
-                Profesor p = profesorDAO.getProfesorById(id);
+                Profesor p = profesorDAO.getById(id);
                 if (p != null) {
                     profesoresSeleccionados.add(p);
                 }
@@ -62,9 +62,28 @@ public class CursoController {
             curso.setProfesores(profesoresSeleccionados);
 
             if (curso.getId() == null) {
-                cursoDAO.insertCurso(curso);
+                cursoDAO.insert(curso);
             } else {
-                cursoDAO.updateCurso(curso);
+                cursoDAO.update(curso);
+                List<Profesor> profesoresActuales = cursoDAO.getRelacionados(curso.getId());
+                for (Profesor profesor : profesoresActuales) {
+                    if (!curso.getProfesorIds().contains(profesor.getId())) {
+                        cursoDAO.removeRelacion(curso.getId(), profesor.getId());
+                    }
+                }
+            }
+            for (Long profesorId : curso.getProfesorIds()) {
+                List<Profesor> profesoresActuales = cursoDAO.getRelacionados(curso.getId());
+                boolean existe = false;
+                for (Profesor profesor : profesoresActuales) {
+                    if (profesor.getId().equals(profesorId)) {
+                        existe = true;
+                        break;
+                    }
+                }
+                if (!existe) {
+                    cursoDAO.addRelacion(curso.getId(), profesorId);
+                }
             }
             return "redirect:/cursos";
         } catch (SQLException e) {
@@ -73,11 +92,10 @@ public class CursoController {
         }
     }
 
-    // Borrar curso
     @GetMapping("/delete/{id}")
-    public String deleteCurso(@PathVariable Long id) {
+    public String delete(@PathVariable Long id) {
         try {
-            cursoDAO.deleteCurso(id);
+            cursoDAO.delete(id);
             return "redirect:/cursos";
         } catch (SQLException e) {
             e.printStackTrace();

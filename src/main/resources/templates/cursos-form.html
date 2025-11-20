@@ -5,11 +5,9 @@
 <th:block th:replace="fragments/header :: header"></th:block>
 
 <div class="container mt-5 pt-5">
-    <h2 th:text="${curso.id == null} ? 'Nuevo Curso' : 'Editar Curso'"></h2>
+    <h2 th:text="${item.id == null} ? 'Nuevo Curso' : 'Editar Curso'"></h2>
 
-    <!-- Formulario -->
-    <form th:action="@{/cursos}" th:object="${curso}" method="post">
-        <!-- ID oculto solo si se está editando -->
+    <form th:action="@{/cursos}" th:object="${item}" method="post">
         <input type="hidden" th:field="*{id}"/>
 
         <div class="mb-3">
@@ -20,10 +18,10 @@
         <div class="mb-3">
             <label class="form-label">Profesores:</label>
             <select th:field="*{profesorIds}" multiple class="form-select">
-                <option th:each="profesor : ${todosProfesores}"
+                <option th:each="profesor : ${relacionados}"
                         th:value="${profesor.id}"
                         th:text="${profesor.nombre + ' ' + profesor.apellido}"
-                        th:selected="${curso.profesorIds.contains(profesor.id)}">
+                        th:selected="${item.profesorIds.contains(profesor.id)}">
                 </option>
             </select>
             <small class="form-text text-muted">

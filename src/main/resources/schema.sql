@@ -48,4 +48,14 @@ CREATE TABLE IF NOT EXISTS ra (
     FOREIGN KEY (curso_id) REFERENCES curso(id) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS aula (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    nombre VARCHAR(100) NOT NULL,
+    edificio VARCHAR(100),
+    planta INT,
+    curso_id BIGINT,
+    UNIQUE KEY (curso_id),
+    FOREIGN KEY (curso_id) REFERENCES curso(id) ON DELETE SET NULL
+);
+
 

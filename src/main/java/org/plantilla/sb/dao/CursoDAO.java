@@ -8,22 +8,20 @@ import java.util.List;
 
 public interface CursoDAO {
 
-    // CRUD
-    List<Curso> listAllCursos() throws SQLException;
+    List<Curso> list() throws SQLException;
 
-    void insertCurso(Curso curso) throws SQLException;
+    void insert(Curso curso) throws SQLException;
 
-    void updateCurso(Curso curso) throws SQLException;
+    void update(Curso curso) throws SQLException;
 
-    void deleteCurso(Long id) throws SQLException;
+    void delete(Long id) throws SQLException;
 
-    Curso getCursoById(Long id) throws SQLException;
+    Curso getById(Long id) throws SQLException;
 
-    // Relación N:M con Profesor
-    List<Profesor> getProfesoresByCursoId(Long cursoId) throws SQLException;
+    List<Profesor> getRelacionados(Long cursoId) throws SQLException;
 
-    void addProfesorToCurso(Long cursoId, Long profesorId) throws SQLException;
+    void addRelacion(Long cursoId, Long profesorId) throws SQLException;
 
-    void removeProfesorFromCurso(Long cursoId, Long profesorId) throws SQLException;
+    void removeRelacion(Long cursoId, Long profesorId) throws SQLException;
 }
 

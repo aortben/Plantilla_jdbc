@@ -16,7 +16,7 @@ public class RADAOImpl implements RADAO {
     private DataSource dataSource;
 
     @Override
-    public List<RA> listAllRA() throws SQLException {
+    public List<RA> list() throws SQLException {
         List<RA> resultados = new ArrayList<>();
         String sql = "SELECT id, nombre, descripcion, curso_id FROM ra";
 
@@ -38,11 +38,11 @@ public class RADAOImpl implements RADAO {
     }
 
     @Override
-    public void insertRA(RA ra) throws SQLException {
+    public void insert(RA ra) throws SQLException {
         String sql = "INSERT INTO ra (nombre, descripcion, curso_id) VALUES (?, ?, ?)";
 
         try (Connection conn = dataSource.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             stmt.setString(1, ra.getNombre());
             stmt.setString(2, ra.getDescripcion());
@@ -54,11 +54,17 @@ public class RADAOImpl implements RADAO {
             }
 
             stmt.executeUpdate();
+
+            try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    ra.setId(generatedKeys.getLong(1));
+                }
+            }
         }
     }
 
     @Override
-    public void updateRA(RA ra) throws SQLException {
+    public void update(RA ra) throws SQLException {
         String sql = "UPDATE ra SET nombre = ?, descripcion = ?, curso_id = ? WHERE id = ?";
 
         try (Connection conn = dataSource.getConnection();
@@ -79,7 +85,7 @@ public class RADAOImpl implements RADAO {
     }
 
     @Override
-    public void deleteRA(Long id) throws SQLException {
+    public void delete(Long id) throws SQLException {
         String sql = "DELETE FROM ra WHERE id = ?";
 
         try (Connection conn = dataSource.getConnection();
@@ -91,7 +97,7 @@ public class RADAOImpl implements RADAO {
     }
 
     @Override
-    public RA getRAById(Long id) throws SQLException {
+    public RA getById(Long id) throws SQLException {
         RA ra = null;
         String sql = "SELECT id, nombre, descripcion, curso_id FROM ra WHERE id = ?";
 
@@ -115,7 +121,7 @@ public class RADAOImpl implements RADAO {
     }
 
     @Override
-    public List<RA> getRAByCursoId(Long cursoId) throws SQLException {
+    public List<RA> getRelacionados(Long cursoId) throws SQLException {
         List<RA> resultados = new ArrayList<>();
         String sql = "SELECT id, nombre, descripcion, curso_id FROM ra WHERE curso_id = ?";
 

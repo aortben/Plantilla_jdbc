@@ -20,5 +20,8 @@ public class Curso {
 
     // Relación 1:N con RA
     private List<Object> resultadosAprendizaje = new ArrayList<>();
+
+    // Relación 1:1 con Aula
+    private Object aula;
 }
 

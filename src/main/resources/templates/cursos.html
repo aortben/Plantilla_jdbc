@@ -1,46 +1,42 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<!-- Head con título -->
-<th:block th:replace="~{fragments/head :: head('Cursos')}"></th:block>
+<th:block th:replace="~{fragments/head :: head(#{page.cursos.title})}"></th:block>
 
 <body>
-<!-- Header -->
 <th:block th:replace="~{fragments/header :: header}"></th:block>
 
 <div class="container mt-5 pt-5">
-    <h2>Lista de Cursos</h2>
-    <a th:href="@{/cursos/new}" class="btn btn-primary mb-3">Nuevo Curso</a>
+    <h2 th:text="#{page.cursos.list}">Lista de Cursos</h2>
+    <a th:href="@{/cursos/new}" class="btn btn-primary mb-3" th:text="#{page.cursos.button.new}">Nuevo Curso</a>
 
     <table class="table table-striped">
         <thead>
         <tr>
-            <th>ID</th>
-            <th>Nombre</th>
-            <th>Profesores</th>
-            <th>Acciones</th>
+            <th th:text="#{label.id}">ID</th>
+            <th th:text="#{label.nombre}">Nombre</th>
+            <th th:text="#{page.cursos.table.header.profesores}">Profesores</th>
+            <th th:text="#{label.acciones}">Acciones</th>
         </tr>
         </thead>
         <tbody>
-        <tr th:each="curso : ${cursos}">
-            <td th:text="${curso.id}"></td>
-            <td th:text="${curso.nombre}"></td>
+        <tr th:each="item : ${items}">
+            <td th:text="${item.id}"></td>
+            <td th:text="${item.nombre}"></td>
             <td>
-                <!-- Mostrar profesores separados por coma sin dejar la última coma -->
-                <span th:each="profesor, iterStat : ${curso.profesores}">
+                <span th:each="profesor, iterStat : ${item.profesores}">
                     <span th:text="${profesor.nombre + ' ' + profesor.apellido}"></span>
                     <span th:if="${!iterStat.last}">, </span>
                 </span>
             </td>
             <td>
-                <a th:href="@{'/cursos/edit/' + ${curso.id}}" class="btn btn-sm btn-warning">Editar</a>
-                <a th:href="@{'/cursos/delete/' + ${curso.id}}" class="btn btn-sm btn-danger">Borrar</a>
+                <a th:href="@{'/cursos/edit/' + ${item.id}}" class="btn btn-sm btn-warning" th:text="#{label.editar}">Editar</a>
+                <a th:href="@{'/cursos/delete/' + ${item.id}}" class="btn btn-sm btn-danger" th:text="#{label.borrar}">Borrar</a>
             </td>
         </tr>
         </tbody>
     </table>
 </div>
 
-<!-- Footer -->
 <th:block th:replace="~{fragments/footer :: footer}"></th:block>
 </body>
 </html>

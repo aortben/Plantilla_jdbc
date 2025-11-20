@@ -8,23 +8,19 @@ import java.util.List;
 
 public interface ProfesorDAO {
 
-    // CRUD
-    List<Profesor> listAllProfesores() throws SQLException;
+    List<Profesor> list() throws SQLException;
 
-    void insertProfesor(Profesor profesor) throws SQLException;
+    void insert(Profesor profesor) throws SQLException;
 
-    void updateProfesor(Profesor profesor) throws SQLException;
+    void update(Profesor profesor) throws SQLException;
 
-    void deleteProfesor(Long id) throws SQLException;
+    void delete(Long id) throws SQLException;
 
-    Profesor getProfesorById(Long id) throws SQLException;
+    Profesor getById(Long id) throws SQLException;
 
-    // Relación N:M con Curso
-    List<Curso> getCursosByProfesorId(Long profesorId) throws SQLException;
+    List<Curso> getRelacionados(Long profesorId) throws SQLException;
 
-    void addCursoToProfesor(Long profesorId, Long cursoId) throws SQLException;
+    void addRelacion(Long profesorId, Long cursoId) throws SQLException;
 
-    void removeCursoFromProfesor(Long profesorId, Long cursoId) throws SQLException;
-
-    List<Curso> listAllCursos() throws SQLException;
+    void removeRelacion(Long profesorId, Long cursoId) throws SQLException;
 }
