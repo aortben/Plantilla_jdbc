@@ -1,15 +1,21 @@
 <header th:fragment="header" xmlns:th="http://www.w3.org/1999/xhtml">
     <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
         <div class="container-fluid">
+
             <a class="navbar-brand fw-bold" th:href="@{/}">
                 Proyecto SB
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse"
-                    aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+
+            <button class="navbar-toggler" type="button"
+                    data-bs-toggle="collapse" data-bs-target="#navbarCollapse"
+                    aria-controls="navbarCollapse" aria-expanded="false"
+                    aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
 
             <div class="collapse navbar-collapse" id="navbarCollapse">
+
+                <!-- MENÚ PRINCIPAL -->
                 <ul class="navbar-nav me-auto mb-2 mb-md-0">
                     <li class="nav-item">
                         <a class="nav-link" th:href="@{/alumnos}">Alumnos</a>
@@ -27,7 +33,18 @@
                         <a class="nav-link" th:href="@{/aulas}">Aulas</a>
                     </li>
                 </ul>
+
+                <!-- SELECTOR DE IDIOMA -->
+                <div class="d-flex">
+                    <a class="btn btn-sm btn-outline-light me-2" th:href="@{/?lang=es}">
+                        🇪🇸 ES
+                    </a>
+                    <a class="btn btn-sm btn-outline-light" th:href="@{/?lang=en}">
+                        🇬🇧 EN
+                    </a>
+                </div>
             </div>
         </div>
     </nav>
 </header>
+
